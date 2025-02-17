@@ -1,0 +1,175 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+// Movie class to represent a movie with title, genre, and available seats
+class Movie {
+String title;
+String genre;
+int availableSeats;
+public Movie(String title, String genre, int availableSeats) {
+this.title = title;
+this.genre = genre;
+this.availableSeats = availableSeats;
+}
+@Override
+public String toString() {
+return &quot;Title: &quot; + title + &quot;, Genre: &quot; + genre + &quot;, Available Seats: &quot; + availableSeats;
+}
+}
+// Booking class to represent a ticket booking by a user
+class Booking {
+int userId;
+String movieTitle;
+int seats;
+public Booking(int userId, String movieTitle, int seats) {
+this.userId = userId;
+this.movieTitle = movieTitle;
+this.seats = seats;
+}
+@Override
+public String toString() {
+return &quot;User ID: &quot; + userId + &quot;, Movie: &quot; + movieTitle + &quot;, Seats: &quot; + seats;
+
+}
+}
+// BookingManager class to manage movie listings and bookings
+class BookingManager {
+private ArrayList&lt;Movie&gt; movies = new ArrayList&lt;&gt;(); // List of movies
+private ArrayList&lt;Booking&gt; bookings = new ArrayList&lt;&gt;(); // List of bookings
+private HashMap&lt;Integer, ArrayList&lt;Booking&gt;&gt; userBookings = new
+HashMap&lt;&gt;(); // Track bookings by user ID
+// Method to add a new movie to the system
+public void addMovie(String title, String genre, int availableSeats) {
+movies.add(new Movie(title, genre, availableSeats));
+}
+// Method to display all available movies
+public void viewMovies() {
+for (Movie movie : movies) {
+System.out.println(movie);
+}
+}
+// Method to book tickets for a specific movie
+public void bookTicket(int userId, String movieTitle, int seats) {
+for (Movie movie : movies) {
+// Check if the movie exists and has enough available seats
+if (movie.title.equalsIgnoreCase(movieTitle) &amp;&amp; movie.availableSeats &gt;= seats) {
+movie.availableSeats -= seats; // Decrease the available seats
+Booking booking = new Booking(userId, movieTitle, seats); // Create a new
+booking
+bookings.add(booking); // Add the booking to the general list
+userBookings.putIfAbsent(userId, new ArrayList&lt;&gt;()); // Create a list for the user if
+not exists
+userBookings.get(userId).add(booking); // Add booking to user&#39;s booking list
+System.out.println(&quot;Booking successful!&quot;);
+return;
+}
+}
+System.out.println(&quot;Booking failed. Not enough available seats or movie not
+found.&quot;);
+}
+
+// Method to cancel an existing booking
+public void cancelBooking(int userId, String movieTitle) {
+ArrayList&lt;Booking&gt; userBookingList = userBookings.get(userId);
+// Get user&#39;s booking list
+if (userBookingList != null) {
+for (Booking booking : userBookingList) {
+// Check if the booking exists for the specified movie
+if (booking.movieTitle.equalsIgnoreCase(movieTitle)) {
+bookings.remove(booking); // Remove from general bookings
+userBookingList.remove(booking); // Remove from user&#39;s bookings
+// Restore the available seats for the movie
+for (Movie movie : movies) {
+if (movie.title.equalsIgnoreCase(movieTitle)) {
+movie.availableSeats += booking.seats;
+break;
+}
+}
+System.out.println(&quot;Booking canceled.&quot;);
+return;
+}
+}
+System.out.println(&quot;No booking found for this movie.&quot;);
+} else {
+System.out.println(&quot;No bookings found for this user.&quot;);
+}
+}
+// Method to view booking history for a user
+public void viewBookingHistory(int userId) {
+ArrayList&lt;Booking&gt; userBookingList = userBookings.get(userId); // Get user&#39;s
+booking list
+if (userBookingList != null) {
+for (Booking booking : userBookingList) {
+System.out.println(booking); // Display each booking
+}
+} else {
+System.out.println(&quot;No bookings found for this user.&quot;);
+}
+}
+}
+
+// Main class to run the application
+public class Main {
+public static void main(String[] args) {
+BookingManager bookingManager = new BookingManager(); // Create
+BookingManager instance
+Scanner scanner = new Scanner(System.in); // Scanner for user input
+int choice;
+// Adding some initial movies to the system
+bookingManager.addMovie(&quot;Inception&quot;, &quot;Sci-Fi&quot;, 100);
+bookingManager.addMovie(&quot;Titanic&quot;, &quot;Romance&quot;, 50);
+bookingManager.addMovie(&quot;Avengers&quot;, &quot;Action&quot;, 200);
+do {
+// Display menu options
+System.out.println(&quot;\nMovie Ticket Booking System&quot;);
+System.out.println(&quot;1. View Movies&quot;);
+System.out.println(&quot;2. Book Ticket&quot;);
+System.out.println(&quot;3. Cancel Booking&quot;);
+System.out.println(&quot;4. View Booking History&quot;);
+System.out.println(&quot;5. Exit&quot;);
+System.out.print(&quot;Enter your choice: &quot;);
+choice = scanner.nextInt(); // Read user choice
+switch (choice) {
+case 1:
+bookingManager.viewMovies(); // View available movies
+break;
+case 2:
+// Book a ticket
+System.out.print(&quot;Enter User ID: &quot;);
+int userId = scanner.nextInt();
+scanner.nextLine(); // Consume newline
+System.out.print(&quot;Enter Movie Title: &quot;);
+String movieTitle = scanner.nextLine();
+System.out.print(&quot;Enter Number of Seats: &quot;);
+int seats = scanner.nextInt();
+bookingManager.bookTicket(userId, movieTitle, seats);
+// Call bookTicket method
+break;
+
+case 3:
+// Cancel a booking
+System.out.print(&quot;Enter User ID: &quot;);
+userId = scanner.nextInt();
+scanner.nextLine(); // Consume newline
+System.out.print(&quot;Enter Movie Title: &quot;);
+movieTitle = scanner.nextLine();
+bookingManager.cancelBooking(userId, movieTitle); // Call cancel Booking
+method
+break;
+case 4:
+// View booking history
+System.out.print(&quot;Enter User ID: &quot;);
+userId = scanner.nextInt();
+bookingManager.viewBookingHistory(userId); // Call view Booking History
+method
+break;
+case 5:
+System.out.println(&quot;Exiting...&quot;); // Exit the program
+break;
+default:
+System.out.println(&quot;Invalid choice. Try again.&quot;); // Invalid choice handling
+}
+} while (choice != 5); // Continue until the user chooses to exit
+scanner.close(); // Close the scanner
+}
+}
